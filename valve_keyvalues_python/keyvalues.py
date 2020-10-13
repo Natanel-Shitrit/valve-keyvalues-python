@@ -141,7 +141,16 @@ class KeyValues(dict):
                 if lines[i].startswith("{"):
                     if not key:
                         raise Exception("'{{' found without key at line {}".format(i + 1))
-                    _mapper[key], i = self.__parse(lines, i=i+1, mapper_type=mapper_type, key_modifier=key_modifier)
+                    # Instead of overriding the mapper, get the data and check if already exists.
+                    data = self.__parse(lines, i=i+1, mapper_type=mapper_type, key_modifier=key_modifier)
+
+                    # Don't override our sections, just appeand the data into them.
+                    if key in _mapper:
+                        _mapper[key].update(data[0])
+                    else:
+                        _mapper[key] = data[0]
+
+                    i = data[1]
                     continue
                 elif lines[i].startswith("}"):
                     return _mapper, i + 1
